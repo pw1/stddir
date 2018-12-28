@@ -10,4 +10,8 @@ var (
 		dirDef{Path: "${LOCALAPPDATA}\\<program>", User: true},
 		dirDef{Path: "${ProgramData}\\<program>"},
 	}
+
+	roamingConfigEntries = []dirDef{
+		dirDef{Path: "${APPDATA}\\<program>", User: true},
+	}
 )

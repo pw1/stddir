@@ -1,10 +1,12 @@
 package stddir
 
 import (
-	"github.com/stretchr/testify/assert"
 	"os"
+	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func restoreEnv(env []string) {
@@ -23,6 +25,16 @@ func TestConfig(t *testing.T) {
 func TestCache(t *testing.T) {
 	dirs := Cache("foobar")
 	assert.True(t, len(dirs) > 0)
+}
+
+func TestRoamingConfig(t *testing.T) {
+	dirs := RoamingConfig("foobar")
+	assert.NotNil(t, dirs)
+	if runtime.GOOS == "windows" {
+		assert.True(t, len(dirs) > 0)
+	} else {
+		assert.True(t, len(dirs) == 0)
+	}
 }
 
 func TestFindEnvVar(t *testing.T) {
@@ -67,7 +79,7 @@ func TestFindEnvVar(t *testing.T) {
 	assert.Equal(t, "FOO", varName)
 }
 
-func TestProcessDirDef(t *testing.T) {
+func TestProcessDirDef1(t *testing.T) {
 	// Clear the environment, so that we can control the variables
 	env := os.Environ()
 	os.Clearenv()
@@ -83,61 +95,104 @@ func TestProcessDirDef(t *testing.T) {
 	assert.Equal(t, 1, len(dirs))
 	assert.Equal(t, "/somewhere/else/foobar", dirs[0].Path)
 	assert.True(t, dirs[0].User)
+}
 
-	e = dirDef{
+func TestProcessDirDef2(t *testing.T) {
+	// Clear the environment, so that we can control the variables
+	env := os.Environ()
+	os.Clearenv()
+	defer restoreEnv(env)
+
+	// There are no environment variables yet
+	e := dirDef{
 		Path: "${HOME}/test/.<program>",
 		User: true,
 	}
-	dirs = processDirDef("foobar", e)
+	dirs := processDirDef("foobar", e)
 	assert.Equal(t, 0, len(dirs))
+}
+
+func TestProcessDirDef3(t *testing.T) {
+	// Clear the environment, so that we can control the variables
+	env := os.Environ()
+	os.Clearenv()
+	defer restoreEnv(env)
 
 	os.Setenv("HOME", "/home/janedoe")
-	e = dirDef{
+	e := dirDef{
 		Path:    "${HOME}/test/.<program>",
 		AltPath: "/somewhere/else/<program>",
 		User:    true,
 	}
-	dirs = processDirDef("foobar", e)
+	dirs := processDirDef("foobar", e)
 	assert.Equal(t, 1, len(dirs))
 	assert.Equal(t, "/home/janedoe/test/.foobar", dirs[0].Path)
 	assert.True(t, dirs[0].User)
+}
+
+func TestProcessDirDef4(t *testing.T) {
+	// Clear the environment, so that we can control the variables
+	env := os.Environ()
+	os.Clearenv()
+	defer restoreEnv(env)
 
 	os.Setenv("HOME", "/home/janedoe")
-	e = dirDef{
+	e := dirDef{
 		Path:    "${FOO}/somewhere/else/<program>",
 		AltPath: "${HOME}/test/.<program>",
 		User:    true,
 	}
-	dirs = processDirDef("foobar", e)
+	dirs := processDirDef("foobar", e)
 	assert.Equal(t, 1, len(dirs))
 	assert.Equal(t, "/home/janedoe/test/.foobar", dirs[0].Path)
 	assert.True(t, dirs[0].User)
+}
+
+func TestProcessDirDef5(t *testing.T) {
+	// Clear the environment, so that we can control the variables
+	env := os.Environ()
+	os.Clearenv()
+	defer restoreEnv(env)
 
 	os.Setenv("HOME", "/home/janedoe")
-	e = dirDef{
+	e := dirDef{
 		Path: "${HOME}/test/${FOO}/.<program>",
 		User: true,
 	}
-	dirs = processDirDef("foobar", e)
+	dirs := processDirDef("foobar", e)
 	assert.Equal(t, 0, len(dirs))
+}
 
-	os.Setenv("ONE", "/one:/alpha")
-	os.Setenv("TWO", "two:beta")
-	e = dirDef{
+func TestProcessDirDef6(t *testing.T) {
+	// Clear the environment, so that we can control the variables
+	env := os.Environ()
+	os.Clearenv()
+	defer restoreEnv(env)
+
+	os.Setenv("ONE", "/one"+string(os.PathListSeparator)+"/alpha")
+	os.Setenv("TWO", "two"+string(os.PathListSeparator)+"beta")
+	e := dirDef{
 		Path: "${ONE}/${TWO}/<program>",
 	}
-	dirs = processDirDef("foobar", e)
+	dirs := processDirDef("foobar", e)
 	assert.Equal(t, 1, len(dirs))
-	assert.Equal(t, "/one:/alpha/two:beta/foobar", dirs[0].Path)
+	assert.Equal(t, "/one"+string(os.PathListSeparator)+"/alpha/two"+string(os.PathListSeparator)+"beta/foobar", dirs[0].Path)
 	assert.False(t, dirs[0].User)
+}
 
-	os.Setenv("ONE", "/one:/alpha")
-	os.Setenv("TWO", "two:beta")
-	e = dirDef{
+func TestProcessDirDef7(t *testing.T) {
+	// Clear the environment, so that we can control the variables
+	env := os.Environ()
+	os.Clearenv()
+	defer restoreEnv(env)
+
+	os.Setenv("ONE", "/one"+string(os.PathListSeparator)+"/alpha")
+	os.Setenv("TWO", "two"+string(os.PathListSeparator)+"beta")
+	e := dirDef{
 		Path: "${ONE}/${TWO}/<program>",
 		List: true,
 	}
-	dirs = processDirDef("foobar", e)
+	dirs := processDirDef("foobar", e)
 	assert.Equal(t, 4, len(dirs))
 	assert.Equal(t, "/one/two/foobar", dirs[0].Path)
 	assert.False(t, dirs[0].User)

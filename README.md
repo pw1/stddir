@@ -4,7 +4,7 @@
 ## Introduction
 Stddir is a cross-platform libray for finding standard directories for configuration files, data
 files, cached data and runtime files. These directories are different for different operating
-systems.
+systems. Supported operating systems are: Linux, Windows, MacOSX, FreeBSD, NetBSD and OpenBSD.
 
 
 ## Config directories
@@ -37,6 +37,16 @@ Note: these are only "local" directories. The roaming profile directory is not r
    * For example: `/Users/janedoe/Library/Application Support/foobar`
 2. `/Library/Application Support/<program>`
    * For example: `/Library/Application Support/foobar`
+
+
+## RoamingConfig directories
+RoamingConfig finds directories where application should store roaming configuration. This
+configuration is synchronized between multiple desktop machines used by the same user.
+See https://en.wikipedia.org/wiki/Roaming_user_profile.
+
+### Windows
+1. `%APPDATA%\<program>`
+   * For example: `C:\Users\JaneDoe\AppData\Roaming\foobar`
 
 
 ## Cache directories

@@ -47,7 +47,7 @@ func Cache(program string) []Dir {
 	return createDirList(program, cacheEntries)
 }
 
-// Config find directories where user-specific and system wide configuration is stored. An array
+// Config finds directories where user-specific and system wide configuration is stored. An array
 // with one or more directories is returned. The array is sorted by the importance. The directory
 // with the highest importance is the first item.
 //
@@ -76,6 +76,18 @@ func Cache(program string) []Dir {
 //      For example: /Library/Application Support/foobar
 func Config(program string) []Dir {
 	return createDirList(program, configEntries)
+}
+
+// RoamingConfig finds directories where user-specific, roaming configuration is stored. Roaming
+// configuration is synchronized between desktops used by the same user.
+//
+// Only Windows supports roaming data.
+//
+// Windows:
+//   1. %APPDATA%\<program>
+//      For example: C:\Users\JaneDoe\AppData\Roaming\foobar
+func RoamingConfig(program string) []Dir {
+	return createDirList(program, roamingConfigEntries)
 }
 
 // Resolve a list of directory definitions. Returns the resolved directories. If a directory
