@@ -10,6 +10,4 @@ var (
 		dirDef{Path: "${HOME}/Library/Application Support/<program>", User: true},
 		dirDef{Path: "/Library/Application Support/<program>"},
 	}
-
-	roamingConfigEntries = []dirDef{}
 )

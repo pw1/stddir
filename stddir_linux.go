@@ -11,6 +11,4 @@ var (
 		dirDef{Path: "${XDG_CONFIG_DIRS}/<program>", AltPath: "/etc/xdg/<program>", List: true},
 		dirDef{Path: "/etc/<program>"},
 	}
-
-	roamingConfigEntries = []dirDef{}
 )

@@ -2,7 +2,6 @@ package stddir
 
 import (
 	"os"
-	"runtime"
 	"strings"
 	"testing"
 
@@ -25,16 +24,6 @@ func TestConfig(t *testing.T) {
 func TestCache(t *testing.T) {
 	dirs := Cache("foobar")
 	assert.True(t, len(dirs) > 0)
-}
-
-func TestRoamingConfig(t *testing.T) {
-	dirs := RoamingConfig("foobar")
-	assert.NotNil(t, dirs)
-	if runtime.GOOS == "windows" {
-		assert.True(t, len(dirs) > 0)
-	} else {
-		assert.True(t, len(dirs) == 0)
-	}
 }
 
 func TestFindEnvVar(t *testing.T) {
@@ -95,6 +84,7 @@ func TestProcessDirDef1(t *testing.T) {
 	assert.Equal(t, 1, len(dirs))
 	assert.Equal(t, "/somewhere/else/foobar", dirs[0].Path)
 	assert.True(t, dirs[0].User)
+	assert.False(t, dirs[0].Roaming)
 }
 
 func TestProcessDirDef2(t *testing.T) {
@@ -128,6 +118,7 @@ func TestProcessDirDef3(t *testing.T) {
 	assert.Equal(t, 1, len(dirs))
 	assert.Equal(t, "/home/janedoe/test/.foobar", dirs[0].Path)
 	assert.True(t, dirs[0].User)
+	assert.False(t, dirs[0].Roaming)
 }
 
 func TestProcessDirDef4(t *testing.T) {
@@ -146,6 +137,7 @@ func TestProcessDirDef4(t *testing.T) {
 	assert.Equal(t, 1, len(dirs))
 	assert.Equal(t, "/home/janedoe/test/.foobar", dirs[0].Path)
 	assert.True(t, dirs[0].User)
+	assert.False(t, dirs[0].Roaming)
 }
 
 func TestProcessDirDef5(t *testing.T) {
@@ -178,6 +170,7 @@ func TestProcessDirDef6(t *testing.T) {
 	assert.Equal(t, 1, len(dirs))
 	assert.Equal(t, "/one"+string(os.PathListSeparator)+"/alpha/two"+string(os.PathListSeparator)+"beta/foobar", dirs[0].Path)
 	assert.False(t, dirs[0].User)
+	assert.False(t, dirs[0].Roaming)
 }
 
 func TestProcessDirDef7(t *testing.T) {
@@ -196,12 +189,35 @@ func TestProcessDirDef7(t *testing.T) {
 	assert.Equal(t, 4, len(dirs))
 	assert.Equal(t, "/one/two/foobar", dirs[0].Path)
 	assert.False(t, dirs[0].User)
+	assert.False(t, dirs[0].Roaming)
 	assert.Equal(t, "/one/beta/foobar", dirs[1].Path)
 	assert.False(t, dirs[1].User)
+	assert.False(t, dirs[1].Roaming)
 	assert.Equal(t, "/alpha/two/foobar", dirs[2].Path)
 	assert.False(t, dirs[2].User)
+	assert.False(t, dirs[2].Roaming)
 	assert.Equal(t, "/alpha/beta/foobar", dirs[3].Path)
 	assert.False(t, dirs[3].User)
+	assert.False(t, dirs[3].Roaming)
+}
+
+func TestProcessDirDefRoamingTag(t *testing.T) {
+	// Clear the environment, so that we can control the variables
+	env := os.Environ()
+	os.Clearenv()
+	defer restoreEnv(env)
+
+	// There are no environment variables yet
+	e := dirDef{
+		Path:    "/some/where/<program>",
+		User:    true,
+		Roaming: true,
+	}
+	dirs := processDirDef("foobar", e)
+	assert.Equal(t, 1, len(dirs))
+	assert.Equal(t, "/some/where/foobar", dirs[0].Path)
+	assert.True(t, dirs[0].User)
+	assert.True(t, dirs[0].Roaming)
 }
 
 func TestCreateDirList(t *testing.T) {

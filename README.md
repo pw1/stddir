@@ -25,28 +25,20 @@ Depending on the operating system the array contains the following items (in thi
    * For example: `/etc/foobar`
 
 ### Windows
-1. `%LOCALAPPDATA%\<program>`
+1. `%APPDATA%\<program>`
+   * For example: `C:\Users\JaneDoe\AppData\Roaming\foobar`
+2. `%LOCALAPPDATA%\<program>`
    * For example: `C:\Users\JaneDoe\AppData\Local\foobar`
-2. `%ProgramData%\<program>`
+3. `%ProgramData%\<program>`
    * For example: `C:\ProgramData\<program>`
 
-Note: these are only "local" directories. The roaming profile directory is not returned.
+Note: The first returned entry is the roaming profile directory.
 
 ### MacOSX
 1. `~/Library/Application Support/<program>`
    * For example: `/Users/janedoe/Library/Application Support/foobar`
 2. `/Library/Application Support/<program>`
    * For example: `/Library/Application Support/foobar`
-
-
-## RoamingConfig directories
-RoamingConfig finds directories where application should store roaming configuration. This
-configuration is synchronized between multiple desktop machines used by the same user.
-See https://en.wikipedia.org/wiki/Roaming_user_profile.
-
-### Windows
-1. `%APPDATA%\<program>`
-   * For example: `C:\Users\JaneDoe\AppData\Roaming\foobar`
 
 
 ## Cache directories

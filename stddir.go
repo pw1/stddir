@@ -11,12 +11,14 @@ type dirDef struct {
 	AltPath string // Alternative Path. This is used if if Path can't be resolved (missing env var).
 	List    bool   // True if environment variables may contain a list of paths
 	User    bool   // Is this a user-specific directory
+	Roaming bool   // Is this a roaming user profile directory.
 }
 
 // Dir represent a single directory.
 type Dir struct {
-	Path string // Absolute path to the directory
-	User bool   // True if this is a user-specific directory, false otherwise.
+	Path    string // Absolute path to the directory
+	User    bool   // True if this is a user-specific directory, false otherwise.
+	Roaming bool   // True if this is a roaming user profile directory, false otherwise.
 }
 
 // Cache finds directories where applications should cache information. An array with one
@@ -64,6 +66,8 @@ func Cache(program string) []Dir {
 //      For example: /etc/foobar
 //
 // Windows:
+//   1. %APPDATA%\<program>
+//      For example: C:\Users\JaneDoe\AppData\Roaming\foobar
 //   1. %LOCALAPPDATA%\<program>
 //      For example: C:\Users\JaneDoe\AppData\Local\foobar
 //   2. %ProgramData%\<program>
@@ -76,18 +80,6 @@ func Cache(program string) []Dir {
 //      For example: /Library/Application Support/foobar
 func Config(program string) []Dir {
 	return createDirList(program, configEntries)
-}
-
-// RoamingConfig finds directories where user-specific, roaming configuration is stored. Roaming
-// configuration is synchronized between desktops used by the same user.
-//
-// Only Windows supports roaming data.
-//
-// Windows:
-//   1. %APPDATA%\<program>
-//      For example: C:\Users\JaneDoe\AppData\Roaming\foobar
-func RoamingConfig(program string) []Dir {
-	return createDirList(program, roamingConfigEntries)
 }
 
 // Resolve a list of directory definitions. Returns the resolved directories. If a directory
@@ -155,8 +147,9 @@ func processDirDef(program string, e dirDef) []Dir {
 	}
 
 	dir := Dir{
-		Path: path,
-		User: e.User,
+		Path:    path,
+		User:    e.User,
+		Roaming: e.Roaming,
 	}
 
 	return []Dir{dir}

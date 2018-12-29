@@ -10,6 +10,4 @@ var (
 		dirDef{Path: "${HOME}/.<program>", User: true},
 		dirDef{Path: "/etc/<program>"},
 	}
-
-	roamingConfigEntries = []dirDef{}
 )
