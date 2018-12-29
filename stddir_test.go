@@ -253,3 +253,38 @@ func TestCreateDirList(t *testing.T) {
 	assert.Equal(t, "/somewhere/else/foobar", dirs[1].Path)
 	assert.False(t, dirs[1].User)
 }
+
+func getStandardDirDefs() []dirDef {
+	defs := []dirDef{
+		dirDef{Path: "/the/place/one"},
+		dirDef{Path: "/the/place/two", Roaming: true},
+		dirDef{Path: "/the/place/three", User: true},
+	}
+	return defs
+}
+
+func TestCreateDirListExcludeRoaming(t *testing.T) {
+	dirs := createDirList("foobar", getStandardDirDefs(), ExcludeRoaming)
+	assert.Equal(t, 2, len(dirs))
+	assert.Equal(t, "/the/place/one", dirs[0].Path)
+	assert.Equal(t, "/the/place/three", dirs[1].Path)
+}
+
+func TestCreateDirListExcludeUser(t *testing.T) {
+	dirs := createDirList("foobar", getStandardDirDefs(), ExcludeUser)
+	assert.Equal(t, 2, len(dirs))
+	assert.Equal(t, "/the/place/one", dirs[0].Path)
+	assert.Equal(t, "/the/place/two", dirs[1].Path)
+}
+
+func TestCreateDirListExcludeSystem(t *testing.T) {
+	dirs := createDirList("foobar", getStandardDirDefs(), ExcludeSystem)
+	assert.Equal(t, 1, len(dirs))
+	assert.Equal(t, "/the/place/three", dirs[0].Path)
+}
+
+func TestCreateDirListExcludeUserAndRoaming(t *testing.T) {
+	dirs := createDirList("foobar", getStandardDirDefs(), ExcludeUser, ExcludeRoaming)
+	assert.Equal(t, 1, len(dirs))
+	assert.Equal(t, "/the/place/one", dirs[0].Path)
+}

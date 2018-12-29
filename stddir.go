@@ -21,9 +21,40 @@ type Dir struct {
 	Roaming bool   // True if this is a roaming user profile directory, false otherwise.
 }
 
+// Flag represent an option that influences which directories are returned. For example, the
+// ExcludeRoaming leaves out any roaming directories.
+type Flag int
+
+const (
+	// ExcludeRoaming is a Flag that indicates that roaming directories must not be returned.
+	ExcludeRoaming Flag = iota
+
+	// ExcludeUser is a Flag that indicates that user-specific directories must not be returned.
+	ExcludeUser
+
+	// ExcludeSystem is a Flag that indicates that system wide directories must not be returned.
+	ExcludeSystem
+)
+
+// flagCollection is a helper class to make it easier to work with a collection of flags.
+type flagCollection []Flag
+
+// Contain returns true if the flagCollection contains the specified flag. Returns false otherwise.
+func (f flagCollection) Contain(flag Flag) bool {
+	for _, value := range f {
+		if value == flag {
+			return true
+		}
+	}
+
+	return false
+}
+
 // Cache finds directories where applications should cache information. An array with one
 // or more directories is returned. The array is sorted by the importance. The directory with the
 // highest importance is the first item.
+//
+// By adding flags to the function call you can exclude certain directories.
 //
 // Depending on the operating system the array contains the following items (in this order):
 //
@@ -45,13 +76,15 @@ type Dir struct {
 //      For example: /Users/janedoe/Library/Caches/foobar
 //   2. /Library/Caches/<program>
 //      For example: /Library/Caches/foobar
-func Cache(program string) []Dir {
-	return createDirList(program, cacheEntries)
+func Cache(program string, flags ...Flag) []Dir {
+	return createDirList(program, cacheEntries, flags...)
 }
 
 // Config finds directories where user-specific and system wide configuration is stored. An array
 // with one or more directories is returned. The array is sorted by the importance. The directory
 // with the highest importance is the first item.
+//
+// By adding flags to the function call you can exclude certain directories.
 //
 // Depending on the operating system the array contains the following items (in this order):
 //
@@ -68,9 +101,9 @@ func Cache(program string) []Dir {
 // Windows:
 //   1. %APPDATA%\<program>
 //      For example: C:\Users\JaneDoe\AppData\Roaming\foobar
-//   1. %LOCALAPPDATA%\<program>
+//   2. %LOCALAPPDATA%\<program>
 //      For example: C:\Users\JaneDoe\AppData\Local\foobar
-//   2. %ProgramData%\<program>
+//   3. %ProgramData%\<program>
 //      For example: C:\ProgramData\<program>
 //
 // MacOSX:
@@ -78,16 +111,26 @@ func Cache(program string) []Dir {
 //      For example: /Users/janedoe/Library/Application Support/foobar
 //   2. /Library/Application Support/<program>
 //      For example: /Library/Application Support/foobar
-func Config(program string) []Dir {
-	return createDirList(program, configEntries)
+func Config(program string, flags ...Flag) []Dir {
+	return createDirList(program, configEntries, flags...)
 }
 
 // Resolve a list of directory definitions. Returns the resolved directories. If a directory
 // definition can't be resolved (e.g. because of a missing environment variable), then it is omitted
 // from the returned directory list.
-func createDirList(program string, entries []dirDef) []Dir {
+func createDirList(program string, entries []dirDef, flags ...Flag) []Dir {
+	// Convert the []Flag into a flagCollection so that I can use the methods on this helper class.
+	var flagCol flagCollection = flags
+
 	dirs := []Dir{}
 	for _, entry := range entries {
+		// Skip over entries that are exluded by a flag.
+		if (entry.Roaming && flagCol.Contain(ExcludeRoaming)) ||
+			(entry.User && flagCol.Contain(ExcludeUser)) ||
+			(!entry.User && flagCol.Contain(ExcludeSystem)) {
+			continue
+		}
+
 		dirs = append(dirs, processDirDef(program, entry)...)
 	}
 	return dirs
