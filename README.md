@@ -3,16 +3,14 @@
 
 ## Introduction
 Stddir is a cross-platform libray for finding standard directories for configuration files, data
-files, cached data and runtime files. These directories are different for different operating
+files, cached data and runtime files. The locations of these directories are different for different operating
 systems. Supported operating systems are: Linux, Windows, MacOSX, FreeBSD, NetBSD and OpenBSD.
+
+Full documentation can be found on Godoc: https://godoc.org/github.com/pw1/stddir
 
 
 ## Config directories
-Config find directories where user-specific and system wide configuration is stored. An array
-with one or more directories is returned. The array is sorted by the importance. The directory
-with the highest importance is the first item.
-
-Depending on the operating system the array contains the following items (in this order):
+Config find directories where user-specific and system wide configuration is stored. Depending on the operating system the array contains the following items:
 
 ### Linux
 1. `${XDG_CONFIG_HOME}/<program>`
@@ -42,11 +40,7 @@ Note: The first returned entry is the roaming profile directory.
 
 
 ## Cache directories
-Cache finds directories where applications should cache information. An array with one
-or more directories is returned. The array is sorted by the importance. The directory with the
-highest importance is the first item.
-
-Depending on the operating system the array contains the following items (in this order):
+Cache finds directories where applications should cache information. Depending on the operating system the array contains the following items:
 
 ### Linux:
 1. `${XDG_CACHE_HOME}/<program>`

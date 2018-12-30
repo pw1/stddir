@@ -5,22 +5,6 @@ import (
 	"strings"
 )
 
-// dirDef defines a directory. This may resolve into multiple directories.
-type dirDef struct {
-	Path    string // Path to the directory, may contain environment variables and "<program>"
-	AltPath string // Alternative Path. This is used if if Path can't be resolved (missing env var).
-	List    bool   // True if environment variables may contain a list of paths
-	User    bool   // Is this a user-specific directory
-	Roaming bool   // Is this a roaming user profile directory.
-}
-
-// Dir represent a single directory.
-type Dir struct {
-	Path    string // Absolute path to the directory
-	User    bool   // True if this is a user-specific directory, false otherwise.
-	Roaming bool   // True if this is a roaming user profile directory, false otherwise.
-}
-
 // Flag represent an option that influences which directories are returned. For example, the
 // ExcludeRoaming leaves out any roaming directories.
 type Flag int
@@ -48,6 +32,22 @@ func (f flagCollection) Contain(flag Flag) bool {
 	}
 
 	return false
+}
+
+// dirDef defines a directory. This may resolve into multiple directories.
+type dirDef struct {
+	Path    string // Path to the directory, may contain environment variables and "<program>"
+	AltPath string // Alternative Path. This is used if if Path can't be resolved (missing env var).
+	List    bool   // True if environment variables may contain a list of paths
+	User    bool   // Is this a user-specific directory
+	Roaming bool   // Is this a roaming user profile directory.
+}
+
+// Dir represent a single directory.
+type Dir struct {
+	Path    string // Absolute path to the directory
+	User    bool   // True if this is a user-specific directory, false otherwise.
+	Roaming bool   // True if this is a roaming user profile directory, false otherwise.
 }
 
 // Cache finds directories where applications should cache information. An array with one
